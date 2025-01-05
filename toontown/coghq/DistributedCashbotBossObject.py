@@ -196,7 +196,8 @@ class DistributedCashbotBossObject(DistributedSmoothNode.DistributedSmoothNode, 
             vel = self.crane.root.getRelativeVector(render, vel)
             vel.normalize()
             impact = vel[1]
-            print(vel)
+            impactMessage = "Impact was %f" % impact
+            base.localAvatar.displayWhisper(0, impactMessage, 2)
             if impact >= self.getMinImpact():
                 print('hit! %s' % impact)
                 self.hitBossSoundInterval.start()
