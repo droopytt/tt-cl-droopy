@@ -380,7 +380,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             # a place to hold them.
             self.goons = []
 
-        self.scales = [0.5, 0.5, 0.5, 0.5, 0.62]
+        self.scales = [0.5, 0.5, 0.5, 0.5, 0.6525]
         return
 
     def __resetBattleThreeObjects(self):
