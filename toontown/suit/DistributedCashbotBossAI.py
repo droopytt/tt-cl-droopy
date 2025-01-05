@@ -96,6 +96,8 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         # The index order to spawn toons
         self.toonSpawnpointOrder = [i for i in range(8)]
 
+        self.scales = None
+
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
 
@@ -377,6 +379,8 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             # We don't actually make the goons right now, but we make
             # a place to hold them.
             self.goons = []
+
+        self.scales = [0.5, 0.5, 0.5, 0.5, 0.62]
         return
 
     def __resetBattleThreeObjects(self):
@@ -679,7 +683,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 else:
                     goon_scale = self.progressRandomValue(self.goonMinScale, self.goonMaxScale, noRandom=self.wantMaxSizeGoons)
             else:
-                goon_scale = self.progressRandomValue(self.goonMinScale, self.goonMaxScale, noRandom=self.wantMaxSizeGoons)
+                if len(self.scales) == 0:
+                    goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
+                else:
+                    goon_scale = self.scales.pop(0)
 
         print(goon_scale)
         # Apply multipliers if necessary

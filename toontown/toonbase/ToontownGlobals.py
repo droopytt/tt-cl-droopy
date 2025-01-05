@@ -601,8 +601,8 @@ PieCodeColors = {PieCodeBossCog: None,
                      0.8,
                      1),
  PieCodeToon: None}
-BossCogRollSpeed = 7.5
-BossCogTurnSpeed = 20
+BossCogRollSpeed = 200
+BossCogTurnSpeed = 200
 BossCogTreadSpeed = 3.5
 BossCogDizzy = 0
 BossCogElectricFence = 1
@@ -1632,3 +1632,4 @@ hood2Coords = {
  'BACK': [(-73.911, 87.426, 11.803, 10.170, 0, 0)],
  'MIDDLE': [(-98.805, 39.180, 11.364, -253.350, 0, 0)],
  'FRONT': [(-105.626, -33.441, 9.777, -211.885, 0, 0)]}
+MinGoonScale = 0.5

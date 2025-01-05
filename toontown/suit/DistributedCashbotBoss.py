@@ -593,7 +593,6 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             #Cut to resistance toon
             Func(camera.setPosHpr, 82, -219, 5, 267, 0, 0),
             Func(rToon.setChatAbsolute, TTL.ResistanceToonWelcome, CFSpeech),
-            Wait(3),
 
             #start the goons on their paths
             Sequence(goonTrack, duration=0),
@@ -609,7 +608,6 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                         rToon.hprInterval(1, VBase3(180, 0, 0)),
                         rToon.posInterval(3, VBase3(120, -255, 0)),
                         Sequence(
-                            Wait(2),    #clear the chat 2 seconds in
                             Func(rToon.clearChat))),
                         Func(rToon.suit.loop, 'neutral'),
                         self.door2.posInterval(3, VBase3(0, 0, 30)))),
@@ -627,7 +625,6 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                         Parallel(
                             bossTrack,
                             Sequence(
-                                Wait(3),
                                 Func(rToon.clearChat),
                                 self.door1.posInterval(3, VBase3(0, 0, 0)))),
                             
@@ -635,18 +632,15 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                             Func(self.setChatAbsolute, TTL.CashbotBossDiscoverToons1, CFSpeech),
                             camera.posHprInterval(1.5, Point3(93.3, -230, 0.7), VBase3(-92.9, 39.7, 8.3)),
                             Func(self.setChatAbsolute, TTL.CashbotBossDiscoverToons2, CFSpeech),
-                            Wait(4),
-                            
+
                             # Cut to toons losing their cog suits.
                             Func(self.clearChat),
                             self.loseCogSuits(self.toonsA + self.toonsB, render, (113, -228, 10, 90, 0, 0)),
-                            Wait(1),
                             Func(rToon.setHpr, 0, 0, 0),
                             self.loseCogSuits([rToon], render, (133, -243, 5, 143, 0, 0), True),
                             
                             #RT tells the toons to fight and runs off to open the door
                             Func(rToon.setChatAbsolute, TTL.ResistanceToonKeepHimBusy, CFSpeech),
-                            Wait(1),
                             Func(self.__showResistanceToon, False), #this turns off his cog suit...
                             Sequence(
                                 Func(rToon.animFSM.request, 'run'),
@@ -667,7 +661,6 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                                     Func(rToon.clearChat),
                                     Func(camera.setPosHpr, 93.3, -230, 0.7, -92.9, 39.7, 8.3),
                                     Func(self.setChatAbsolute, attackToons, CFSpeech),
-                                    Wait(2),
                                     Func(self.clearChat))
 		
         return Sequence(Func(camera.reparentTo, render), track)
@@ -721,7 +714,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         bossTrack.append(Func(self.getGeomNode().setH, 180))
         bossTrack.append(Func(self.pelvis.setHpr, self.pelvisForwardHpr))
         bossTrack.append(Func(self.loop, 'Ff_neutral'))
-        track, hpr = self.rollBossToPoint(startPos, startHpr, startPos, battleHpr, 0)
+        track, hpr = self.rollBossToPoint(startPos, startHpr, startPos, battleHpr, 1)
         bossTrack.append(track)
         track, hpr = self.rollBossToPoint(startPos, None, battlePos, None, 0)
         bossTrack.append(track)
@@ -756,39 +749,26 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             Func(camera.reparentTo, self.geom),
             Func(camera.setPosHpr, 105, -326, 5, 136.3, 0, 0),
             Func(rToon.setChatAbsolute, TTL.ResistanceToonWatchThis, CFSpeech),
-            Wait(2),
             Func(rToon.clearChat),
             
             #Cut to the CFO telling the RT to knock it off
             Func(camera.setPosHpr, 105, -326, 20, -45.3, 11, 0),
             Func(self.setChatAbsolute, TTL.CashbotBossGetAwayFromThat, CFSpeech),
-            Wait(2),
             Func(self.clearChat),
             
             #The RT is having fun... cut to him doing the safe thing
             camera.posHprInterval(1.5, Point3(105, -326, 5), Point3(136.3, 0, 0), blendType='easeInOut'),
-            
-            #tell em what to do
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonCraneInstructions1, CFSpeech),
-            Wait(4),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonCraneInstructions2, CFSpeech),
-            Wait(4),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonCraneInstructions3, CFSpeech),
-            Wait(4),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonCraneInstructions4, CFSpeech),
-            Wait(4),
+
             Func(rToon.clearChat),
             
             # Cut to the recovering goon
             Func(camera.setPosHpr, 102, -323.6, 0.9, -10.6, 14, 0),
             Func(goon.request, 'Recovery'),
-            Wait(2),
             
             # Cut to the surprised resistance toon 
             Func(camera.setPosHpr, 95.4, -332.6, 4.2, 167.1, -13.2, 0),
             Func(rToon.setChatAbsolute, TTL.ResistanceToonGetaway, CFSpeech),
             Func(rToon.animFSM.request, 'jump'),
-            Wait(1.8),
             Func(rToon.clearChat),
             
             #Cut to the goon chasing rtoon... close the door
