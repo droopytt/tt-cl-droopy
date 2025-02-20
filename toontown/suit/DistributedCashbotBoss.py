@@ -566,7 +566,6 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             if toon:
                 delayDeletes.append(DelayDelete.DelayDelete(toon, 'CashbotBoss.makeIntroductionMovie'))
 
-        rtTrack = Sequence()
         startPos = Point3(ToontownGlobals.CashbotBossOffstagePosHpr[0], ToontownGlobals.CashbotBossOffstagePosHpr[1], ToontownGlobals.CashbotBossOffstagePosHpr[2])
         battlePos = Point3(ToontownGlobals.CashbotBossBattleOnePosHpr[0], ToontownGlobals.CashbotBossBattleOnePosHpr[1], ToontownGlobals.CashbotBossBattleOnePosHpr[2])
         battleHpr = VBase3(ToontownGlobals.CashbotBossBattleOnePosHpr[3], ToontownGlobals.CashbotBossBattleOnePosHpr[4], ToontownGlobals.CashbotBossBattleOnePosHpr[5])
@@ -583,113 +582,8 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         bossTrack.append(track)
         bossTrack.append(Func(self.getGeomNode().setH, 0))
         bossTrack.append(Func(self.pelvis.setHpr, self.pelvisReversedHpr))
-
-        # Create a track for the fake goons
-        goonTrack = self.__makeGoonMovieForIntro()
-        attackToons = TTL.CashbotBossCogAttack
-        rToon = self.resistanceToon
-        rToon.setPosHpr(*ToontownGlobals.CashbotRTBattleOneStartPosHpr)
-        track = Sequence(
-            #Cut to resistance toon
-            Func(camera.setPosHpr, 82, -219, 5, 267, 0, 0),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonWelcome, CFSpeech),
-
-            #start the goons on their paths
-            Sequence(goonTrack, duration=0),
-            #Func(goonTrack.start),
-            
-            #RT runs to the endvault door and opens it
-            Parallel(
-                camera.posHprInterval(4, Point3(108, -244, 4), VBase3(211.5, 0, 0)),
-                Sequence(
-                    Func(rToon.suit.setPlayRate, 1.4, 'walk'),
-                    Func(rToon.suit.loop, 'walk'),
-                    Parallel(
-                        rToon.hprInterval(1, VBase3(180, 0, 0)),
-                        rToon.posInterval(3, VBase3(120, -255, 0)),
-                        Sequence(
-                            Func(rToon.clearChat))),
-                        Func(rToon.suit.loop, 'neutral'),
-                        self.door2.posInterval(3, VBase3(0, 0, 30)))),
-                        
-                        #Cut to the CFO rolling in
-                        Func(rToon.setHpr, 0, 0, 0),
-                        Func(rToon.setChatAbsolute, TTL.ResistanceToonTooLate, CFSpeech),
-                        Func(camera.reparentTo, render),
-                        Func(camera.setPosHpr, 61.1, -228.8, 10.2, -90, 0, 0),
-                        
-                        #Open the CFO door
-                        self.door1.posInterval(2, VBase3(0, 0, 30)),
-                        
-                        #Roll the CFO in and close the door
-                        Parallel(
-                            bossTrack,
-                            Sequence(
-                                Func(rToon.clearChat),
-                                self.door1.posInterval(3, VBase3(0, 0, 0)))),
-                            
-                            #Close-up of the CFO...
-                            Func(self.setChatAbsolute, TTL.CashbotBossDiscoverToons1, CFSpeech),
-                            camera.posHprInterval(1.5, Point3(93.3, -230, 0.7), VBase3(-92.9, 39.7, 8.3)),
-                            Func(self.setChatAbsolute, TTL.CashbotBossDiscoverToons2, CFSpeech),
-
-                            # Cut to toons losing their cog suits.
-                            Func(self.clearChat),
-                            self.loseCogSuits(self.toonsA + self.toonsB, render, (113, -228, 10, 90, 0, 0)),
-                            Func(rToon.setHpr, 0, 0, 0),
-                            self.loseCogSuits([rToon], render, (133, -243, 5, 143, 0, 0), True),
-                            
-                            #RT tells the toons to fight and runs off to open the door
-                            Func(rToon.setChatAbsolute, TTL.ResistanceToonKeepHimBusy, CFSpeech),
-                            Func(self.__showResistanceToon, False), #this turns off his cog suit...
-                            Sequence(
-                                Func(rToon.animFSM.request, 'run'),
-                                rToon.hprInterval(1, VBase3(180, 0, 0)), #turn him around
-                                Parallel(
-                                    Sequence(
-                                        rToon.posInterval(1.5, VBase3(109, -294, 0)),
-                                        Parallel(Func(rToon.animFSM.request, 'jump')),
-                                        rToon.posInterval(1.5, VBase3(93.935, -341.065, 2))),
-                                    self.door2.posInterval(3, VBase3(0, 0, 0))),
-                                    Func(rToon.animFSM.request, 'neutral')),
-                                    
-                                    #clean up the toons' eyes
-                                    self.toonNormalEyes(self.involvedToons),
-                                    self.toonNormalEyes([self.resistanceToon], True),
-                                    
-                                    #cut back to the CFO and move the toons in to place
-                                    Func(rToon.clearChat),
-                                    Func(camera.setPosHpr, 93.3, -230, 0.7, -92.9, 39.7, 8.3),
-                                    Func(self.setChatAbsolute, attackToons, CFSpeech),
-                                    Func(self.clearChat))
 		
-        return Sequence(Func(camera.reparentTo, render), track)
-
-        
-
-    def __makeGoonMovieForBattleThree(self):
-        #start them each walking back and forth between 2 points
-        goonPosHprs = [[Point3(111, -287, 0),
-          VBase3(165, 0, 0),
-          Point3(101, -323, 0),
-          VBase3(165, 0, 0)], [Point3(119, -315, 0),
-          VBase3(357, 0, 0),
-          Point3(121, -280, 0),
-          VBase3(357, 0, 0)], [Point3(102, -320, 0),
-          VBase3(231, 0, 0),
-          Point3(127, -337, 0),
-          VBase3(231, 0, 0)]]
-        
-        #we're gonna leave this guy on the side... stunned
-        mainGoon = self.fakeGoons[0]
-        goonLoop = Parallel()
-        print(self.fakeGoons)
-        for i in range(1, self.numFakeGoons):
-            goon = self.fakeGoons[i]
-            goonLoop.append(Sequence(goon.posHprInterval(8, goonPosHprs[i][0], goonPosHprs[i][1]), goon.posHprInterval(8, goonPosHprs[i][2], goonPosHprs[i][3])))
-
-        goonTrack = Sequence(Func(self.__showFakeGoons, 'Walk'), Func(mainGoon.request, 'Stunned'), Func(goonLoop.loop), Wait(20))
-        return goonTrack
+        return bossTrack
 
     def makePrepareBattleThreeMovie(self, delayDeletes, crane):
 
@@ -721,73 +615,20 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         track, hpr = self.rollBossToPoint(battlePos, battleHpr, battlePos, finalHpr, 0)
         bossTrack.append(track)
         
-        #grab the resistance toon and put him in his starting spot
-        rToon = self.resistanceToon
-        rToon.setPosHpr(93.935, -341.065, 0, -45, 0, 0)
-        
-        #get a crane/goon to play with
-        goon = self.fakeGoons[0]
-        crane = self.cranes[0]
-        
         #build the sequence
         track = Sequence(
             Func(self.__hideToons),
-            #set up the crane and goon
-            Func(crane.request, 'Movie'),
-            Func(crane.accomodateToon, rToon),
-            Func(goon.request, 'Stunned'),
-            Func(goon.setPosHpr, 104, -316, 0, 165, 0, 0),
-            
-            #open the door and roll the boss through
             Parallel(
                 self.door2.posInterval(4.5, VBase3(0, 0, 30)),
                 self.door3.posInterval(4.5, VBase3(0, 0, 30)),
                 bossTrack),
-                
-            #Cut to the resistance toon... he's gonna show the players something
-            Func(rToon.loop, 'leverNeutral'),
-            Func(camera.reparentTo, self.geom),
-            Func(camera.setPosHpr, 105, -326, 5, 136.3, 0, 0),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonWatchThis, CFSpeech),
-            Func(rToon.clearChat),
             
-            #Cut to the CFO telling the RT to knock it off
-            Func(camera.setPosHpr, 105, -326, 20, -45.3, 11, 0),
-            Func(self.setChatAbsolute, TTL.CashbotBossGetAwayFromThat, CFSpeech),
-            Func(self.clearChat),
-            
-            #The RT is having fun... cut to him doing the safe thing
-            camera.posHprInterval(1.5, Point3(105, -326, 5), Point3(136.3, 0, 0), blendType='easeInOut'),
-
-            Func(rToon.clearChat),
-            
-            # Cut to the recovering goon
-            Func(camera.setPosHpr, 102, -323.6, 0.9, -10.6, 14, 0),
-            Func(goon.request, 'Recovery'),
-            
-            # Cut to the surprised resistance toon 
-            Func(camera.setPosHpr, 95.4, -332.6, 4.2, 167.1, -13.2, 0),
-            Func(rToon.setChatAbsolute, TTL.ResistanceToonGetaway, CFSpeech),
-            Func(rToon.animFSM.request, 'jump'),
-            Func(rToon.clearChat),
-            
-            #Cut to the goon chasing rtoon... close the door
-            Func(camera.setPosHpr, 109.1, -300.7, 13.9, -15.6, -13.6, 0),
-            Func(rToon.animFSM.request, 'run'),
-            Func(goon.request, 'Walk'),
-            Parallel(
-                self.door3.posInterval(3, VBase3(0, 0, 0)),
-                rToon.posHprInterval(3, Point3(136, -212.9, 0), VBase3(-14, 0, 0), startPos=Point3(110.8, -292.7, 0), startHpr=VBase3(-14, 0, 0)),
-                goon.posHprInterval(3, Point3(125.2, -243.5, 0), VBase3(-14, 0, 0), startPos=Point3(104.8, -309.5, 0), startHpr=VBase3(-14, 0, 0))),
-            Func(self.__hideFakeGoons),
-            Func(crane.request, 'Free'),
-            
-            #fix the CFO's orientation
+            Parallel(self.door3.posInterval(3, VBase3(0, 0, 0))),
             Func(self.getGeomNode().setH, 0),
             self.moveToonsToBattleThreePos(self.getInvolvedToonsNotSpectating()),
             Func(self.__showToons))
 
-        return Sequence(Func(camera.reparentTo, self), Func(camera.setPosHpr, 0, -27, 25, 0, -18, 0), track)
+        return track
 
     def moveToonsToBattleThreePos(self, toons):
         track = Parallel()
