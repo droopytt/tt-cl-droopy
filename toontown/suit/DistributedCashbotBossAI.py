@@ -175,11 +175,13 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.sendUpdate('updateSpectators', [self.spectators])
 
     def progressValue(self, fromValue, toValue):
-        t0 = float(self.bossDamage) / float(self.ruleset.CFO_MAX_HP)
+        damage_ratio = float(self.bossDamage) / float(self.ruleset.CFO_MAX_HP)
         elapsed = globalClock.getFrameTime() - self.battleThreeStart
-        t1 = elapsed / float(self.battleThreeDuration)
-        t = max(t0, t1)
-        return fromValue + (toValue - fromValue) * min(t, 1)
+        time_ratio = elapsed / float(self.battleThreeDuration)
+        t = max(damage_ratio, time_ratio)
+        progress_value = fromValue + (toValue - fromValue) * min(t, 1)
+        print(f"Progress value {progress_value} damage ratio {damage_ratio}")
+        return progress_value
 
     # Any time you change the ruleset, you should call this to sync the clients
     def d_setRawRuleset(self):
@@ -380,7 +382,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             # a place to hold them.
             self.goons = []
 
-        self.scales = [0.5, 0.5, 0.5, 0.5, 0.63]
+        self.scales = [0.5, 0.5, 0.5, 0.5, 0.61]
         return
 
     def __resetBattleThreeObjects(self):
