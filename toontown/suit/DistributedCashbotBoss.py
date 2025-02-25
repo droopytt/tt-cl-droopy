@@ -598,9 +598,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             if toon:
                 delayDeletes.append(DelayDelete.DelayDelete(toon, 'CashbotBoss.makePrepareBattleThreeMovie'))
 
-        startPos = Point3(ToontownGlobals.CashbotBossBattleOnePosHpr[0], ToontownGlobals.CashbotBossBattleOnePosHpr[1], ToontownGlobals.CashbotBossBattleOnePosHpr[2])
         battlePos = Point3(ToontownGlobals.CashbotBossBattleThreePosHpr[0], ToontownGlobals.CashbotBossBattleThreePosHpr[1], ToontownGlobals.CashbotBossBattleThreePosHpr[2])
-        startHpr = Point3(ToontownGlobals.CashbotBossBattleOnePosHpr[3], ToontownGlobals.CashbotBossBattleOnePosHpr[4], ToontownGlobals.CashbotBossBattleOnePosHpr[5])
         battleHpr = VBase3(ToontownGlobals.CashbotBossBattleThreePosHpr[3], ToontownGlobals.CashbotBossBattleThreePosHpr[4], ToontownGlobals.CashbotBossBattleThreePosHpr[5])
         finalHpr = VBase3(135, 0, 0)
         bossTrack = Sequence()
@@ -608,25 +606,12 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         bossTrack.append(Func(self.getGeomNode().setH, 180))
         bossTrack.append(Func(self.pelvis.setHpr, self.pelvisForwardHpr))
         bossTrack.append(Func(self.loop, 'Ff_neutral'))
-        track, hpr = self.rollBossToPoint(startPos, startHpr, startPos, battleHpr, 1)
+        track, hpr = self.rollBossToPoint(battlePos, battleHpr, battlePos, finalHpr, 1)
         bossTrack.append(track)
-        track, hpr = self.rollBossToPoint(startPos, None, battlePos, None, 0)
-        bossTrack.append(track)
-        track, hpr = self.rollBossToPoint(battlePos, battleHpr, battlePos, finalHpr, 0)
-        bossTrack.append(track)
-        
+
         #build the sequence
         track = Sequence(
-            Func(self.__hideToons),
-            Parallel(
-                self.door2.posInterval(4.5, VBase3(0, 0, 30)),
-                self.door3.posInterval(4.5, VBase3(0, 0, 30)),
-                bossTrack),
-            
-            Parallel(self.door3.posInterval(3, VBase3(0, 0, 0))),
-            Func(self.getGeomNode().setH, 0),
-            self.moveToonsToBattleThreePos(self.getInvolvedToonsNotSpectating()),
-            Func(self.__showToons))
+            self.moveToonsToBattleThreePos(self.getInvolvedToonsNotSpectating()))
 
         return track
 
