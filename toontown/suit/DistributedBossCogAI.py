@@ -624,7 +624,6 @@ class DistributedBossCogAI(DistributedAvatarAI.DistributedAvatarAI):
             t += radius * random.uniform(-1, 1)
         t = max(min(t, 1.0), 0.0)
         progress_random_value = fromValue + (toValue - fromValue) * t
-        print(f"Prog. random value {progress_random_value} and radius {radius} with final t as {t}")
         return progress_random_value
 
     def reportToonHealth(self):

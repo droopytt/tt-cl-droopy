@@ -179,9 +179,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         elapsed = globalClock.getFrameTime() - self.battleThreeStart
         time_ratio = elapsed / float(self.battleThreeDuration)
         t = max(damage_ratio, time_ratio)
-        progress_value = fromValue + (toValue - fromValue) * min(t, 1)
-        print(f"Progress value {progress_value} damage ratio {damage_ratio}")
-        return progress_value
+        return fromValue + (toValue - fromValue) * min(t, 1)
 
     # Any time you change the ruleset, you should call this to sync the clients
     def d_setRawRuleset(self):
@@ -677,20 +675,9 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             goon_hfov = self.progressRandomValue(70, 80)
             goon_attack_radius = self.progressRandomValue(6, 15)
             goon_strength = int(self.progressRandomValue(self.ruleset.MIN_GOON_DAMAGE, self.ruleset.MAX_GOON_DAMAGE))
-            elapsed = globalClock.getFrameTime() - self.battleThreeStart
-            print("Elapsed Time: %s" % elapsed)
-            if self.wantCraneThreePractice:
-                if elapsed > 5:
-                    goon_scale = 0.61
-                else:
-                    goon_scale = self.progressRandomValue(self.goonMinScale, self.goonMaxScale, noRandom=self.wantMaxSizeGoons)
-            else:
-                if len(self.scales) == 0:
-                    goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
-                else:
-                    goon_scale = self.scales.pop(0)
+            goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5)
+            print(f"Goon scale is {goon_scale}")
 
-        print(goon_scale)
         # Apply multipliers if necessary
         goon_velocity *= self.ruleset.GOON_SPEED_MULTIPLIER
 
