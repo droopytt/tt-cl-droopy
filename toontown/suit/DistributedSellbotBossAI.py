@@ -355,7 +355,7 @@ class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.pieTime = globalClock.getFrameTime()
         for doId, do in simbase.air.doId2do.items():
             if str(doId)[0] != str(simbase.air.districtId)[0]:
-                do.d_setSystemMessage(0, "Crane Round Ended In {0:.5f}s".format(self.pieTime - self.battleThreeStart))
+                do.d_setSystemMessage(0, "Pie Round Ended In {0:.5f}s".format(self.pieTime - self.battleThreeStart))
         self.resetBattles()
 
     def exitNearVictory(self):

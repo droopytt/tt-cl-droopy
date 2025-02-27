@@ -97,6 +97,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.toonSpawnpointOrder = [i for i in range(8)]
 
         self.scales = None
+        self.goonCount = 0
 
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
@@ -381,6 +382,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             self.goons = []
 
         self.scales = [0.5, 0.5, 0.5, 0.5, 0.61]
+        self.goonCount = 0
         return
 
     def __resetBattleThreeObjects(self):
@@ -677,6 +679,12 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             goon_strength = int(self.progressRandomValue(self.ruleset.MIN_GOON_DAMAGE, self.ruleset.MAX_GOON_DAMAGE))
             goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5)
             print(f"Goon scale is {goon_scale}")
+            self.goonCount += 1
+            if self.goonCount >= 5:
+                for toon_id in self.involvedToons:
+                    av = self.air.doId2do.get(toon_id)
+                    required_impact = 15/(goon_scale * 25)
+                    av.sendUpdate('setSystemMessage',[0, f"Goon spawning with scale {goon_scale}. Impact required for 15 damage {required_impact}"])
 
         # Apply multipliers if necessary
         goon_velocity *= self.ruleset.GOON_SPEED_MULTIPLIER
