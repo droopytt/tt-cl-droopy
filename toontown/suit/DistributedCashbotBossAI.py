@@ -95,8 +95,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
 
         # The index order to spawn toons
         self.toonSpawnpointOrder = [i for i in range(8)]
-
-        self.scales = None
         self.goonCount = 0
 
     def d_setToonSpawnpointOrder(self):
@@ -381,7 +379,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             # a place to hold them.
             self.goons = []
 
-        self.scales = [0.5, 0.5, 0.5, 0.5, 0.61]
         self.goonCount = 0
         return
 
@@ -640,7 +637,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.goonMovementTime = globalClock.getFrameTime()
         if side == None:
             if not self.wantOpeningModifications:
-                side = random.choice(['EmergeB', 'EmergeB'])
+                side = random.choice(['EmergeA', 'EmergeB'])
             else:
                 for t in self.involvedToons:
                     avId = t
@@ -677,9 +674,11 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             goon_hfov = self.progressRandomValue(70, 80)
             goon_attack_radius = self.progressRandomValue(6, 15)
             goon_strength = int(self.progressRandomValue(self.ruleset.MIN_GOON_DAMAGE, self.ruleset.MAX_GOON_DAMAGE))
-            goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5)
-            print(f"Goon scale is {goon_scale}")
             self.goonCount += 1
+            if self.goonCount == 5:
+                goon_scale = max(self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons), 0.61)
+            else:
+                goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
             if self.goonCount >= 5:
                 for toon_id in self.involvedToons:
                     av = self.air.doId2do.get(toon_id)
