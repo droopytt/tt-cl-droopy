@@ -345,6 +345,7 @@ class DistributedCashbotBossObject(DistributedSmoothNode.DistributedSmoothNode, 
         self.craneId = craneId
 
         self.crane = self.cr.doId2do.get(craneId)
+        self.localControl = True
 
         self.hideShadows()
         self.prepareGrab()
@@ -379,6 +380,7 @@ class DistributedCashbotBossObject(DistributedSmoothNode.DistributedSmoothNode, 
         self.craneId = craneId
 
         self.crane = self.cr.doId2do.get(craneId)
+        self.localControl = False
 
         # The "crane" might actually be the boss cog himself!  This
         # happens when the boss takes a safe to wear as a helmet.
@@ -489,6 +491,7 @@ class DistributedCashbotBossObject(DistributedSmoothNode.DistributedSmoothNode, 
         self.resetSpeedCaching()
         self.avId = 0
         self.craneId = 0
+        self.localControl = False
 
     def exitFree(self):
         pass
