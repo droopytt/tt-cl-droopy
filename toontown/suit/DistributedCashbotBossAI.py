@@ -97,6 +97,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.toonSpawnpointOrder = [i for i in range(8)]
         self.goonCount = 0
 
+        # A dictionary to track last hit times for each toon
+        self.lastHitTimes = {}
+        self.hitCooldown = 3.0  # 3 second cooldown
+
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
 
@@ -860,6 +864,18 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
 
         if self.state != 'BattleThree':
             return
+            
+        # Check if toon is on hit cooldown
+        currentTime = globalClock.getFrameTime()
+        if avId in self.lastHitTimes:
+            timeSinceLastHit = currentTime - self.lastHitTimes[avId]
+            if timeSinceLastHit < self.hitCooldown:
+                # Toon is on cooldown, ignore the hit
+                self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (self.hitCooldown - timeSinceLastHit))
+                return
+                
+        # Update last hit time
+        self.lastHitTimes[avId] = currentTime
 
         # Momentum mechanic?
         if self.ruleset.WANT_MOMENTUM_MECHANIC:
@@ -1056,7 +1072,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             taskMgr.doMethodLater(14.5, self.stunCFO, "stunCFO")
             #taskMgr.doMethodLater(19, self.checkNearbyTwo, "checkNearbyTwo")
         else:
-            #taskMgr.doMethodLater(7, self.stunAllGoons, "stompAllGoons")
             pass
 
         # Force unstun the CFO if he was stunned in a previous Battle Three round
