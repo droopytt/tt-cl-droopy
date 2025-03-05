@@ -3226,6 +3226,7 @@ class StartBoss(MagicWord):
                 # However, as it is just a one-off call at the beginning of the session this may be acceptable as list
                 # contains ~3000 elements only
                 toons = self.getToonsInZoneId(hood.zoneId)
+                toons = sorted(toons, key=lambda t: t.doId)
                 toon_doids = list(map(lambda t: t.doId, toons))
                 zone = hood.lobbyMgr.createBossOffice(toon_doids)
                 for foundToon in toons:
