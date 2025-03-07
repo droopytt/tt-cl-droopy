@@ -15,10 +15,10 @@ start start_uberdog_server.bat
 ping 192.0.2.2 -n 1 -w 300 > nul
 start start_ai_server.bat
 
-ping 192.0.2.2 -n 1 -w 1500 > nul
-start start_game.bat
 ping 192.0.2.2 -n 1 -w 500 > nul
 start start_game_alt_1.bat
+ping 192.0.2.2 -n 1 -w 1500 > nul
+start start_game.bat
 ping 192.0.2.2 -n 1 -w 500 > nul
 start start_game_alt_2.bat
 ping 192.0.2.2 -n 1 -w 500 > nul
