@@ -922,7 +922,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             min = actualTime // 60
             sec = actualTime % 60
             frac = int((actualTime - int(actualTime)) * 100)
-            new_time = '{:02}:{:02}.{:03}'.format(int(min), int(sec), frac)
+            new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
             av = self.air.doId2do.get(avId)
             av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
 
