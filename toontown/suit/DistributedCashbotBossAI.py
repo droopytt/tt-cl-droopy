@@ -901,6 +901,15 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             # dizzy) will make the boss dizzy for a little while.
             self.b_setAttackCode(ToontownGlobals.BossCogDizzy)
             self.d_updateStunCount(avId, craneId)
+            craneTime = globalClock.getFrameTime()
+            actualTime = craneTime - self.battleThreeTimeStarted
+            min = actualTime // 60
+            sec = actualTime % 60
+            frac = int((actualTime - int(actualTime)) * 100)
+            new_time = '{:02}:{:02}.{:03}'.format(int(min), int(sec), frac)
+            av = self.air.doId2do.get(avId)
+            av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
+
         else:
 
             if self.ruleset.CFO_FLINCHES_ON_HIT:
