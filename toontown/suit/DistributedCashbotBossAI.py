@@ -913,10 +913,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         if self.wantNoStunning:
             hitMeetsStunRequirements = False
         if hitMeetsStunRequirements:
-            # A particularly good hit (when he's not already
-            # dizzy) will make the boss dizzy for a little while.
-            self.b_setAttackCode(ToontownGlobals.BossCogDizzy)
-            self.d_updateStunCount(avId, craneId)
             craneTime = globalClock.getFrameTime()
             actualTime = craneTime - self.battleThreeTimeStarted
             min = actualTime // 60
@@ -925,6 +921,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
             av = self.air.doId2do.get(avId)
             av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
+            # A particularly good hit (when he's not already
+            # dizzy) will make the boss dizzy for a little while.
+            self.b_setAttackCode(ToontownGlobals.BossCogDizzy)
+            self.d_updateStunCount(avId, craneId)
 
         else:
 
