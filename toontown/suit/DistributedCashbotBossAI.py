@@ -871,7 +871,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             timeSinceLastHit = currentTime - self.lastHitTimes[avId]
             if timeSinceLastHit < self.hitCooldown:
                 # Toon is on cooldown, ignore the hit
-                self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (self.hitCooldown - timeSinceLastHit))
+                remaining = self.hitCooldown - timeSinceLastHit
+                self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (remaining))
+                av = self.air.doId2do.get(avId)
+                av.sendUpdate('setSystemMessage', [0, f"Hit was too fast - time remaining: {remaining}"])
                 return
                 
         # Update last hit time
