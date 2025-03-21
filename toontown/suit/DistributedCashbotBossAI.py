@@ -13,13 +13,13 @@ from toontown.suit import DistributedCashbotBossGoonAI
 from toontown.suit import DistributedGoonAI
 from toontown.coghq import DistributedCashbotBossTreasureAI
 from toontown.coghq import CraneLeagueGlobals
-from toontown.battle import BattleExperienceAI
-from toontown.chat import ResistanceChat
-from toontown.toon import DistributedToonAI
 from direct.fsm import FSM
 from . import DistributedBossCogAI
 import random
 import math
+
+from ..coghq.CraneLeagueGlobals import CRANE_OBJECT_HIT_COOLDOWN
+
 
 class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedCashbotBossAI')
@@ -99,7 +99,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
 
         # A dictionary to track last hit times for each toon
         self.lastHitTimes = {}
-        self.hitCooldown = 3.0  # 3 second cooldown
+        self.hitCooldown = CRANE_OBJECT_HIT_COOLDOWN  # 3 second cooldown
 
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
