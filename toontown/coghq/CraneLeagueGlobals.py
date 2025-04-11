@@ -2,7 +2,7 @@
 from toontown.toonbase import ToontownGlobals
 
 SPECIAL_MODIFIER_CHANCE = 3  # % chance you want to roll a special modifier for a cfo  *** server side only
-CRANE_OBJECT_HIT_COOLDOWN = 3.0 # Minimum time in seconds between hits
+CRANE_OBJECT_HIT_COOLDOWN = 2.95 # Minimum time in seconds between hits
 
 # Ruleset
 
