@@ -20,13 +20,19 @@ ITERATIONS = 2_000_000
 
 def probability_of_stun_with_hp(hp_remaining):
     values = list()
+    max = 0
+    min = 20
     for i in range(ITERATIONS):
         damage = 500 - hp_remaining
         goon_scale = progress_random_value(damage, 0.5, 1.5)
+        if goon_scale > max:
+            max = goon_scale
+        if goon_scale < min:
+            min = goon_scale
         if goon_scale >= STUN_GOON_SCALE:
             values.append(goon_scale)
     probability = "{:.2f}".format((len(values) / ITERATIONS) * 100)
-    print(f"Probability of stun goon as 5th goon given {hp_remaining} after first 4 goons health is ~{probability}%")
+    print(f"Probability of stun goon as 5th goon given {hp_remaining} after first 4 goons health is ~{probability}% (min,max with this HP left is {min},{max})")
 
 for health in range (MIN_GOON_RANGE, MAX_GOON_RANGE+1):
     probability_of_stun_with_hp(health)
