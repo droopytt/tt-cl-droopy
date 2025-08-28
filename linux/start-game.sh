@@ -3,4 +3,4 @@ cd ..
 
 export TTOFF_LOGIN_TOKEN=dev
 
-/usr/bin/python2 -m toontown.launcher.TTOffQuickStartLauncher
+/usr/bin/python3 -m toontown.launcher.TTOffQuickStartLauncher
