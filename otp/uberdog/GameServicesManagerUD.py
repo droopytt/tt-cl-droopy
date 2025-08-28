@@ -87,6 +87,11 @@ class DeveloperAccountDB(AccountDB):
 CLIENTAGENT_EJECT = 1004
 CLIENTAGENT_OPEN_CHANNEL = 1100
 CLIENTAGENT_SET_CLIENT_ID = 1001
+STATESERVER_OBJECT_DELETE_RAM = 2032
+CLIENTAGENT_ADD_POST_REMOVE = 1110
+CLIENTAGENT_CLEAR_POST_REMOVES = 1111
+CLIENTAGENT_REMOVE_SESSION_OBJECT = 1013
+
 
 class GameOperation(FSM):
     """
@@ -236,7 +241,6 @@ class LoginOperation(GameOperation):
     def enterSetAccount(self):
         # If somebody's already logged into this account, disconnect them.
         datagram = PyDatagram()
-        print("Client agent eject is " + str(CLIENTAGENT_EJECT))
         datagram.addServerHeader(self.gameServicesManager.GetAccountConnectionChannel(self.accountId),
                                  self.gameServicesManager.air.ourChannel, CLIENTAGENT_EJECT)
         datagram.addUint16(OTPGlobals.BootedLoggedInElsewhere)
@@ -246,14 +250,12 @@ class LoginOperation(GameOperation):
         # Now we'll add this connection to the account channel.
         datagram = PyDatagram()
         datagram.addServerHeader(self.target, self.gameServicesManager.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
-        print("Client agent open channel is " + str(CLIENTAGENT_OPEN_CHANNEL))
         datagram.addChannel(self.gameServicesManager.GetAccountConnectionChannel(self.accountId))
         self.gameServicesManager.air.send(datagram)
 
         # Set their sender channel to represent their account affiliation.
         datagram = PyDatagram()
         datagram.addServerHeader(self.target, self.gameServicesManager.air.ourChannel, CLIENTAGENT_SET_CLIENT_ID)
-        print("Client agent set client is " + str(CLIENTAGENT_SET_CLIENT_ID))
         datagram.addChannel(self.accountId << 32)  # accountId in high 32 bits, 0 in low (no avatar).
         self.gameServicesManager.air.send(datagram)
 
@@ -511,6 +513,7 @@ class LoadAvatarOperation(AvatarOperation):
         # avatar in the event of them disconnecting while we are working.
         cleanupDatagram = PyDatagram()
         cleanupDatagram.addServerHeader(self.avId, channel, STATESERVER_OBJECT_DELETE_RAM)
+
         cleanupDatagram.addUint32(self.avId)
         datagram = PyDatagram()
         datagram.addServerHeader(channel, self.gameServicesManager.air.ourChannel, CLIENTAGENT_ADD_POST_REMOVE)
@@ -627,6 +630,7 @@ class UnloadAvatarOperation(GameOperation):
 
         # Next, remove the avatar channel.
         datagram = PyDatagram()
+        print(CLIENTAGENT_CLOSE_CHANNEL)
         datagram.addServerHeader(channel, self.gameServicesManager.air.ourChannel, CLIENTAGENT_CLOSE_CHANNEL)
         datagram.addChannel(self.gameServicesManager.GetPuppetConnectionChannel(self.avId))
         self.gameServicesManager.air.send(datagram)
