@@ -683,11 +683,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 goon_scale = max(self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons), 0.61)
             else:
                 goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
-            if self.goonCount >= 5:
-                for toon_id in self.involvedToons:
-                    av = self.air.doId2do.get(toon_id)
-                    required_impact = 15/(goon_scale * 25)
-                    av.sendUpdate('setSystemMessage',[0, f"Goon spawning with scale {goon_scale:.3f}. Impact required for 15 damage {required_impact:.3f}"])
 
         # Apply multipliers if necessary
         goon_velocity *= self.ruleset.GOON_SPEED_MULTIPLIER

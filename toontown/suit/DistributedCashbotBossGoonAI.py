@@ -322,9 +322,7 @@ class DistributedCashbotBossGoonAI(DistributedGoonAI.DistributedGoonAI, Distribu
                 damage *= crane.getDamageMultiplier()
                 damage *= self.boss.ruleset.GOON_CFO_DAMAGE_MULTIPLIER
                 damage = math.ceil(damage)
-                avatar = self.air.doId2do.get(avId)
-                max_possible_damage = int(25 * self.scale)
-                avatar.sendUpdate('setSystemMessage', [0, f"Impact {impact:.3f}, damage {damage}/{max_possible_damage} (scale {self.scale:.3f})"])
+
                 self.boss.recordHit(max(damage, 2), impact, craneId)
         self.b_destroyGoon()
 
