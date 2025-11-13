@@ -68,7 +68,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.wantCraneOnePractice = False
         
         # Controlled RNG parameters, True to enable, False to disable
-        self.wantOpeningModifications = False
+        self.wantOpeningModifications = True
         self.wantMaxSizeGoons = True
         self.wantLiveGoonPractice = False
         self.wantNoStunning = False
@@ -869,7 +869,12 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 remaining = self.hitCooldown - timeSinceLastHit
                 self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (remaining))
                 av = self.air.doId2do.get(avId)
-                av.sendUpdate('setSystemMessage', [0, f"Hit was too fast - time remaining: {remaining}"])
+                minimumTime = currentTime - self.battleThreeTimeStarted + remaining
+                min = minimumTime // 60
+                sec = minimumTime % 60
+                frac = int((minimumTime - int(minimumTime)) * 100)
+                new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
+                av.sendUpdate('setSystemMessage', [0, f"Hit was too fast - time remaining: {remaining}. Minimum at {new_time}"])
                 return
                 
         # Update last hit time
@@ -912,10 +917,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             hitMeetsStunRequirements = False
         if hitMeetsStunRequirements:
             craneTime = globalClock.getFrameTime()
-            actualTime = craneTime - self.battleThreeTimeStarted
-            min = actualTime // 60
-            sec = actualTime % 60
-            frac = int((actualTime - int(actualTime)) * 100)
+            minimumTime = craneTime - self.battleThreeTimeStarted
+            min = minimumTime // 60
+            sec = minimumTime % 60
+            frac = int((minimumTime - int(minimumTime)) * 100)
             new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
             av = self.air.doId2do.get(avId)
             av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
