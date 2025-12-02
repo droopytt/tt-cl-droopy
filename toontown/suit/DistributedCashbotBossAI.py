@@ -864,18 +864,17 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         currentTime = globalClock.getFrameTime()
         if avId in self.lastHitTimes:
             timeSinceLastHit = currentTime - self.lastHitTimes[avId]
+            av = self.air.doId2do.get(avId)
             if timeSinceLastHit < self.hitCooldown:
                 # Toon is on cooldown, ignore the hit
                 remaining = self.hitCooldown - timeSinceLastHit
                 self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (remaining))
-                av = self.air.doId2do.get(avId)
                 minimumTime = currentTime - self.battleThreeTimeStarted + remaining
-                min = minimumTime // 60
-                sec = minimumTime % 60
-                frac = int((minimumTime - int(minimumTime)) * 100)
-                new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
+                new_time = self.format_time_as_string(minimumTime)
                 av.sendUpdate('setSystemMessage', [0, f"Hit was too fast - time remaining: {remaining}. Minimum at {new_time}"])
                 return
+            else:
+                av.sendUpdate('setSystemMessage', [0, f"Hit registered at {self.format_time_as_string(currentTime - self.battleThreeTimeStarted)}"])
                 
         # Update last hit time
         self.lastHitTimes[avId] = currentTime
@@ -918,10 +917,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         if hitMeetsStunRequirements:
             craneTime = globalClock.getFrameTime()
             minimumTime = craneTime - self.battleThreeTimeStarted
-            min = minimumTime // 60
-            sec = minimumTime % 60
-            frac = int((minimumTime - int(minimumTime)) * 100)
-            new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
+            new_time = self.format_time_as_string(minimumTime)
             av = self.air.doId2do.get(avId)
             av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
             # A particularly good hit (when he's not already
@@ -939,6 +935,13 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         # Now at the very end, if we have momentum mechanic on add some damage multiplier
         if self.ruleset.WANT_MOMENTUM_MECHANIC:
             self.increaseToonOutgoingMultiplier(avId, damage)
+
+    def format_time_as_string(self, time):
+        min = time // 60
+        sec = time % 60
+        frac = int((time - int(time)) * 100)
+        new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
+        return new_time
 
     def b_setBossDamage(self, bossDamage):
         self.d_setBossDamage(bossDamage)
