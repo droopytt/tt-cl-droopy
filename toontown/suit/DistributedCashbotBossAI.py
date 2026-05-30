@@ -21,6 +21,9 @@ from . import DistributedBossCogAI
 import random
 import math
 
+from ..coghq.CraneLeagueGlobals import CRANE_OBJECT_HIT_COOLDOWN
+
+
 class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedCashbotBossAI')
 
@@ -69,7 +72,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         
         # Controlled RNG parameters, True to enable, False to disable
         self.wantOpeningModifications = False
-        self.wantMaxSizeGoons = True
+        self.wantMaxSizeGoons = False
         self.wantLiveGoonPractice = False
         self.wantNoStunning = False
 
@@ -95,11 +98,11 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
 
         # The index order to spawn toons
         self.toonSpawnpointOrder = [i for i in range(8)]
+        self.goonCount = 0
 
         # A dictionary to track last hit times for each toon
         self.lastHitTimes = {}
-        self.hitCooldown = 2.5  # 3 second cooldown
-        self.goonCount = 0
+        self.hitCooldown = CRANE_OBJECT_HIT_COOLDOWN  # 3 second cooldown
 
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
@@ -169,10 +172,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         self.sendUpdate('updateSpectators', [self.spectators])
 
     def progressValue(self, fromValue, toValue):
-        t0 = float(self.bossDamage) / float(self.ruleset.CFO_MAX_HP)
+        damage_ratio = float(self.bossDamage) / float(self.ruleset.CFO_MAX_HP)
         elapsed = globalClock.getFrameTime() - self.battleThreeStart
-        t1 = elapsed / float(self.battleThreeDuration)
-        t = max(t0, t1)
+        time_ratio = elapsed / float(self.battleThreeDuration)
+        t = max(damage_ratio, time_ratio)
         return fromValue + (toValue - fromValue) * min(t, 1)
 
     # Any time you change the ruleset, you should call this to sync the clients
@@ -369,12 +372,12 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 safe.generateWithRequired(self.zoneId)
                 self.safes.append(safe)
 
-        self.goonCount = 0
-
         if self.goons == None:
             # We don't actually make the goons right now, but we make
             # a place to hold them.
             self.goons = []
+
+        self.goonCount = 0
         return
 
     def __resetBattleThreeObjects(self):
@@ -669,15 +672,12 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             goon_hfov = self.progressRandomValue(70, 80)
             goon_attack_radius = self.progressRandomValue(6, 15)
             goon_strength = int(self.progressRandomValue(self.ruleset.MIN_GOON_DAMAGE, self.ruleset.MAX_GOON_DAMAGE))
-            elapsed = globalClock.getFrameTime() - self.battleThreeStart
             self.goonCount += 1
             if self.goonCount == 5:
-                goon_scale = max(
-                    self.progressRandomValue(CraneLeagueGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons), 0.61)
+                goon_scale = max(self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons), 0.61)
             else:
-                goon_scale = self.progressRandomValue(CraneLeagueGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
+                goon_scale = self.progressRandomValue(ToontownGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
 
-        print(goon_scale)
         # Apply multipliers if necessary
         goon_velocity *= self.ruleset.GOON_SPEED_MULTIPLIER
 
@@ -911,6 +911,11 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         if self.wantNoStunning:
             hitMeetsStunRequirements = False
         if hitMeetsStunRequirements:
+            craneTime = globalClock.getFrameTime()
+            minimumTime = craneTime - self.battleThreeTimeStarted
+            new_time = self.format_time_as_string(minimumTime)
+            av = self.air.doId2do.get(avId)
+            av.sendUpdate('setSystemMessage', [0, f"Stun time: {new_time}"])
             # A particularly good hit (when he's not already
             # dizzy) will make the boss dizzy for a little while.
             self.b_setAttackCode(ToontownGlobals.BossCogDizzy)
@@ -925,6 +930,13 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         # Now at the very end, if we have momentum mechanic on add some damage multiplier
         if self.ruleset.WANT_MOMENTUM_MECHANIC:
             self.increaseToonOutgoingMultiplier(avId, damage)
+
+    def format_time_as_string(self, time):
+        min = time // 60
+        sec = time % 60
+        frac = int((time - int(time)) * 100)
+        new_time = '{:02}:{:02}.{:02}'.format(int(min), int(sec), frac)
+        return new_time
 
     def b_setBossDamage(self, bossDamage):
         self.d_setBossDamage(bossDamage)

@@ -2,6 +2,7 @@
 from toontown.toonbase import ToontownGlobals
 
 SPECIAL_MODIFIER_CHANCE = 3  # % chance you want to roll a special modifier for a cfo  *** server side only
+CRANE_OBJECT_HIT_COOLDOWN = 2.5
 
 # Ruleset
 
@@ -1325,8 +1326,6 @@ HELPFUL_MODIFIER_CLASSES = getModifiersOfType(CFORulesetModifierBase.HELPFUL)
 SPECIAL_MODIFIER_CLASSES = getModifiersOfType(CFORulesetModifierBase.SPECIAL)
 
 NON_SPECIAL_MODIFIER_CLASSES = HURTFUL_MODIFIER_CLASSES + HELPFUL_MODIFIER_CLASSES
-
-MinGoonScale = 0.5
 
 # Used for when i want to spit out a cheat sheet
 # for e, c in CFORulesetModifierBase.MODIFIER_SUBCLASSES.items():
