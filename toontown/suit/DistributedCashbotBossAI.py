@@ -99,6 +99,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         # A dictionary to track last hit times for each toon
         self.lastHitTimes = {}
         self.hitCooldown = 2.5  # 3 second cooldown
+        self.goonCount = 0
 
     def d_setToonSpawnpointOrder(self):
         self.sendUpdate('setToonSpawnpoints', [self.toonSpawnpointOrder])
@@ -367,6 +368,8 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 safe = DistributedCashbotBossSafeAI.DistributedCashbotBossSafeAI(self.air, self, index)
                 safe.generateWithRequired(self.zoneId)
                 self.safes.append(safe)
+
+        self.goonCount = 0
 
         if self.goons == None:
             # We don't actually make the goons right now, but we make
@@ -667,17 +670,12 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             goon_attack_radius = self.progressRandomValue(6, 15)
             goon_strength = int(self.progressRandomValue(self.ruleset.MIN_GOON_DAMAGE, self.ruleset.MAX_GOON_DAMAGE))
             elapsed = globalClock.getFrameTime() - self.battleThreeStart
-            print("Elapsed Time: %s" % elapsed)
-            if self.wantCraneThreePractice:
-                if elapsed > 5:
-                    goon_scale = 0.612
-                else:
-                    goon_scale = self.progressRandomValue(self.goonMinScale, self.goonMaxScale, noRandom=self.wantMaxSizeGoons)
+            self.goonCount += 1
+            if self.goonCount == 5:
+                goon_scale = max(
+                    self.progressRandomValue(CraneLeagueGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons), 0.61)
             else:
-                if elapsed > 5:
-                    goon_scale = 0.612
-                else:
-                    goon_scale = self.progressRandomValue(self.goonMinScale, self.goonMaxScale, noRandom=self.wantMaxSizeGoons)
+                goon_scale = self.progressRandomValue(CraneLeagueGlobals.MinGoonScale, 1.5, noRandom=self.wantMaxSizeGoons)
 
         print(goon_scale)
         # Apply multipliers if necessary
@@ -860,11 +858,20 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         currentTime = globalClock.getFrameTime()
         if avId in self.lastHitTimes:
             timeSinceLastHit = currentTime - self.lastHitTimes[avId]
+            av = self.air.doId2do.get(avId)
             if timeSinceLastHit < self.hitCooldown:
                 # Toon is on cooldown, ignore the hit
-                self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (self.hitCooldown - timeSinceLastHit))
+                remaining = self.hitCooldown - timeSinceLastHit
+                self.debug(doId=avId, content='Hit ignored - on cooldown for %.1f more seconds' % (remaining))
+                minimumTime = currentTime - self.battleThreeTimeStarted + remaining
+                new_time = self.format_time_as_string(minimumTime)
+                av.sendUpdate('setSystemMessage',
+                              [0, f"Hit was too fast - time remaining: {remaining}. Minimum at {new_time}"])
                 return
-                
+            else:
+                av.sendUpdate('setSystemMessage', [0,
+                                                   f"Hit registered at {self.format_time_as_string(currentTime - self.battleThreeTimeStarted)}"])
+
         # Update last hit time
         self.lastHitTimes[avId] = currentTime
 
@@ -1054,7 +1061,6 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             taskMgr.doMethodLater(14.5, self.stunCFO, "stunCFO")
             #taskMgr.doMethodLater(19, self.checkNearbyTwo, "checkNearbyTwo")
         else:
-            taskMgr.doMethodLater(8, self.stunAllGoons, "stompAllGoons")
             pass
 
         # Force unstun the CFO if he was stunned in a previous Battle Three round

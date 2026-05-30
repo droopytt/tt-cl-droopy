@@ -1326,8 +1326,11 @@ SPECIAL_MODIFIER_CLASSES = getModifiersOfType(CFORulesetModifierBase.SPECIAL)
 
 NON_SPECIAL_MODIFIER_CLASSES = HURTFUL_MODIFIER_CLASSES + HELPFUL_MODIFIER_CLASSES
 
+MinGoonScale = 0.5
+
 # Used for when i want to spit out a cheat sheet
 # for e, c in CFORulesetModifierBase.MODIFIER_SUBCLASSES.items():
 #     i = c()
 #     d = i.getDescription() % {'color_start': '', 'color_end': ''}
 #     print('(ID:%s) %s\n%s\n' % (e, i.getName(), d))
+

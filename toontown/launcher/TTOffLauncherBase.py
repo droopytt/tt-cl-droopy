@@ -32,8 +32,6 @@ class TTOffLauncherBase(LauncherBase):
         log = open(logfile, 'a')
         logOut = LogAndOutput(sys.__stdout__, log)
         logErr = LogAndOutput(sys.__stderr__, log)
-        sys.stdout = logOut
-        sys.stderr = logErr
         print('\n\nStarting %s...' % self.GameName)
         print('Current time: ' + time.asctime(time.localtime(time.time())) + ' ' + time.tzname[0])
         print('sys.path = ', sys.path)
