@@ -139,7 +139,6 @@ class DistributedCashbotBossObject(DistributedSmoothNode.DistributedSmoothNode, 
         self.startVelocityCachingName = self.uniqueName('startVelocityCaching')
 
         # Disable RespectPrevTransform
-        base.cTrav.setRespectPrevTransform(False)
 
     def activatePhysics(self):
         if not self.physicsActivated:
